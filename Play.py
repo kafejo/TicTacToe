@@ -1,9 +1,10 @@
 __author__ = 'Ales Kocur'
 
 from TicTacToe import *
+import time
 
 #game = Game(size=4, starting_player=Player.X, ai_player=Player.O)
-game = TicTacToe()
+game = TicTacToe(size=3)
 game.draw()
 
 while not game.has_winner():
@@ -12,7 +13,10 @@ while not game.has_winner():
 
     if (game.whose_turn() == game.ai_player):
         print("{}'s thinking...".format(game.ai_player.name))
+        start = time.time()
         position = game.next_ai_move()
+        end = time.time()
+        print('Took: {}s'.format(end - start))
     else:
         x = int(input('Row index:'))
         y = int(input('Column index:'))

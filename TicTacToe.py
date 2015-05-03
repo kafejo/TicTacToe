@@ -3,6 +3,7 @@ __author__ = 'Ales Kocur'
 import copy
 from enum import Enum, IntEnum
 import itertools
+import sys
 
 COLUMN_SEPARATOR = '|'
 
@@ -57,7 +58,7 @@ class TicTacToe:
         self.starting_player = starting_player
         self._is_end = (False, Player.none)
         self.turn_count = 0
-        ai_next_move = Position(0, 0)
+        self.ai_next_move = Position(0, 0)
 
 #   PUBLIC METHODS
     def move(self, position):
@@ -72,7 +73,8 @@ class TicTacToe:
         self._is_end_state_for_move(position)
         self.turn_count += 1
 
-        if self.turn_count == len(self.board) * len(self.board):
+        board_size = len(self.board)
+        if self.turn_count == board_size * board_size:
             self._is_end = (True, Player.none)
 
         return True
@@ -105,7 +107,7 @@ class TicTacToe:
             self._print_line()
 
     def next_ai_move(self):
-        self.minimax()
+        self.minimax(0, -sys.maxsize, sys.maxsize)
         return self.ai_next_move
 
 #   PRIVATE METHODS
@@ -174,13 +176,13 @@ class TicTacToe:
 
 # Minimax algorithm
     # Evaluate method
-    def rate(self):
+    def rate(self, depth):
         if self.winner() == self.ai_player:
-            return 10
+            return 100 - depth
         elif self.winner() == Player.none:
             return 0
         else:
-            return -10
+            return depth - 100
 
     def available_positions(self):
         positions = []
@@ -199,27 +201,31 @@ class TicTacToe:
         game_copy.move(move)
         return game_copy
 
-
-    def minimax(self):
+    def minimax(self, depth, alpha, beta):
 
         if self.has_winner():
-            return self.rate()
+            return self.rate(depth)
 
+        depth += 1
+        rates, moves = [], []
 
-        rates = []
-        moves = []
+        ai_on_move = self.whose_turn() == self.ai_player
 
         for position in self.available_positions():
             possible_game = self.game_state_with_move(position)
-            #possible_game.draw()
-            rates.append(possible_game.minimax())
             moves.append(position)
+            rates.append(possible_game.minimax(depth, alpha, beta))
 
-        if self.whose_turn() == self.ai_player:
-            max_rate_index = rates.index(max(rates))
-            self.ai_next_move = moves[max_rate_index]
-            return rates[max_rate_index]
-        else:
-            min_rate_index = rates.index(min(rates))
-            self.ai_next_move = moves[min_rate_index]
-            return rates[min_rate_index]
+            if ai_on_move:
+                alpha = max(alpha, rates[-1])
+            else:
+                beta = min(beta, rates[-1])
+
+            if alpha >= beta:
+                break
+
+        m_value = max(rates) if ai_on_move else min(rates)
+
+        index = rates.index(m_value)
+        self.ai_next_move = moves[index]
+        return rates[index]
