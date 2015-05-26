@@ -4,7 +4,7 @@ from TicTacToe import *
 import time
 
 #game = Game(size=4, starting_player=Player.X, ai_player=Player.O)
-game = TicTacToe(size=3)
+game = TicTacToe(size=20)
 game.draw()
 
 while not game.has_winner():
@@ -22,7 +22,7 @@ while not game.has_winner():
         y = int(input('Column index:'))
         position = Position(x, y)
 
-    #print('Choosen position: {} {}'.format(position.x, position.y))
+    print('Choosen position: {} {}'.format(position.x, position.y))
 
     if game.move(position):
         game.draw()
